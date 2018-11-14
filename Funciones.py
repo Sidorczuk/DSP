@@ -25,7 +25,7 @@ def Senoidal_Generator(fs, f0, N, a0=1, p0=0, plot=0):
     x = np.linspace(0,(N-1)*ts,N).flatten() #linspace(start,stop,total)
     x = x.reshape(N,1)
 
-    y = a0 * np.sin(x*2*np.pi*f0 + p0).flatten()
+    y = a0 * np.sin(x*2*np.pi*f0 + p0)#.flatten()
     y = y.reshape(N,1)
 
     if plot!=0:
@@ -120,7 +120,20 @@ def PrintModule(freq,espectro,beg,fin,x,y,label,tipo="stem",scale="lin"):
         plt.stem(freq[int(beg):int(fin)], modulo[int(beg):int(fin)])
     plt.title('Módulo del Espectro - '+label)
     plt.xlabel('Frecuencia [Hz]')
-    
+
+def PowerModule(freq,modulo,beg,fin,x,y,label,tipo="stem",scale="lin"):
+    plt.figure(figsize=(x,y))
+    if scale == "log":
+        modulo = 10*np.log10(modulo)
+        plt.ylabel('Potencia [dB]')
+    else:
+        plt.ylabel('Potencia [V^2/Hz]')
+    if tipo == "plot":
+        plt.plot(freq[int(beg):int(fin)], modulo[int(beg):int(fin)])
+    else:
+        plt.stem(freq[int(beg):int(fin)], modulo[int(beg):int(fin)])
+    plt.title('PSD - '+label)
+    plt.xlabel('Frecuencia [Hz]')
     
 def PrintPhase(freq,espectro,beg,fin,x,y,label,tipo="stem"):
     N=len(espectro.T)
@@ -224,3 +237,38 @@ def LogAvoidZero(E,N):
         if E[0][i] == 0:
             E[0][i] = 1e-12
     return E
+
+def RecW(N):
+    w = []
+    for i in range(N):
+        w.append( 1 )
+    return w
+
+def BartlettW(N):
+    w = []
+    for i in range(N):
+        w.append( 1 - abs(2*i-N+1)/(N+1) )
+    return w
+
+def BlackmanW(N):
+    w = []
+    for i in range(N):
+        w.append( 0.42 - 0.5*(np.cos(2*np.pi*i/(N-1)) ) + 0.08*(np.cos(4*np.pi*i/(N-1)) ))
+    return w
+
+def HannW(N):
+    w = []
+    for i in range(N):
+        w.append( 0.5*(1 - np.cos(2*np.pi*i/(N-1)) ) )
+    return w
+
+def FlatTopW(N):
+    w = []
+    for i in range(N):
+        aux = 0.21557895
+        aux -= 0.41663158 * np.cos(2*np.pi*i/(N-1))
+        aux += 0.277263158 * np.cos(4*np.pi*i/(N-1))
+        aux -= 0.083578947 * np.cos(6*np.pi*i/(N-1))
+        aux += 0.006947368 * np.cos(8*np.pi*i/(N-1))
+        w.append( aux )
+    return w
