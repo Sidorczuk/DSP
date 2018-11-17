@@ -105,7 +105,7 @@ def Analizador_de_Espectro(señal, N, Ts, plot=0):
     return espectro,freq
 
 def PrintModule(freq,espectro,beg,fin,x,y,label,tipo="stem",scale="lin"):
-    N=len(espectro.T)
+    N=len(espectro.flatten())
     modulo=np.abs(espectro/(N/2))
     modulo=modulo.reshape(N,1)
     plt.figure(figsize=(x,y))
@@ -272,3 +272,28 @@ def FlatTopW(N):
         aux += 0.006947368 * np.cos(8*np.pi*i/(N-1))
         w.append( aux )
     return w
+
+def Welch(s,L,rep):
+    N = len(s.flatten())
+    s = s.reshape(1,N)
+    K = int(2 * (N/L) - 1)
+    D = int(L/2)
+    for i in range(K):
+        W = np.array(BartlettW(L))
+        U = sum(W**2)/len(W)      
+        W = W.reshape(1,L)
+        PSDw = np.zeros([rep,L])
+        for k in range(rep):
+            n1 = np.array(s[k,:])
+            x = np.zeros([K,L])
+            for j in range(K):
+                beg = j*D
+                fin = int( (j/2 + 1)*L )
+                x[j,:] = n1[beg:fin]*W
+            
+            PSDx = (abs(np.fft.fft(x,axis=1))**2)/L
+            PSDw[k,:] = np.mean(PSDx,axis=0)
+        
+        PSDw /= U
+        PSDp = np.mean(PSDw,axis=0)
+        return PSDp
