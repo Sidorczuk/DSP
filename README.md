@@ -1,2 +1,2 @@
 # DSP
-Curso de procesamiento digital de señales
+Curso de procesamiento digital de señales UTN FRBA
